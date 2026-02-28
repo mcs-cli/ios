@@ -70,7 +70,7 @@ On session start, the pack detects your booted simulator and reports its UUID. D
 brew install bguidolim/tap/my-claude-setup
 
 # 2. Register this tech pack
-mcs pack add https://github.com/bguidolim/mcs-ios-pack
+mcs pack add bguidolim/mcs-ios-pack
 
 # 3. Sync your project
 cd ~/Developer/my-ios-project
