@@ -13,3 +13,6 @@ All build, test, and run operations go through **XcodeBuildMCP**. When a task re
 - Always use `__PROJECT__` with the appropriate scheme
 - **Never** suppress warnings — if any are related to the session, fix them
 - Prefer `snapshot_ui` over `screenshot` (screenshot only as fallback)
+
+## Code Quality
+- After modifying Swift files, **always run the project's formatter and linter** before committing
