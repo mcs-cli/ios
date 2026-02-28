@@ -1,0 +1,117 @@
+schemaVersion: 1
+identifier: mcs-ios-pack
+displayName: "iOS Development Pack"
+description: Xcode integration, simulator management, and Apple documentation for Claude Code
+version: "1.0.0"
+minMCSVersion: "2026.2.25"
+
+# ---------------------------------------------------------------------------
+# Prompts — resolved interactively during `mcs configure`
+# ---------------------------------------------------------------------------
+prompts:
+  - key: PROJECT
+    type: fileDetect
+    label: "Xcode project / workspace"
+    detectPattern:
+      - "*.xcodeproj"
+      - "*.xcworkspace"
+
+# ---------------------------------------------------------------------------
+# Components (short IDs — auto-prefixed by engine with `mcs-ios-pack.`)
+# ---------------------------------------------------------------------------
+components:
+  # ── Dependencies ────────────────────────────────────────────────────────
+  - id: homebrew
+    displayName: Homebrew
+    description: macOS package manager
+    type: brewPackage
+    shell: '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
+    doctorChecks:
+      - type: commandExists
+        name: Homebrew
+        section: Dependencies
+        command: brew
+
+  - id: node
+    displayName: Node.js
+    description: JavaScript runtime (for npx-based MCP servers)
+    dependencies: [homebrew]
+    brew: node
+
+  - id: jq
+    description: JSON processor (used by simulator hook)
+    dependencies: [homebrew]
+    brew: jq
+
+  # ── MCP Servers ─────────────────────────────────────────────────────────
+  - id: xcodebuildmcp
+    displayName: XcodeBuildMCP
+    description: MCP server for Xcode build, test, and simulator workflows
+    dependencies: [node]
+    mcp:
+      name: XcodeBuildMCP
+      command: npx
+      args:
+        - "-y"
+        - "xcodebuildmcp@latest"
+        - "mcp"
+      env:
+        XCODEBUILDMCP_SENTRY_DISABLED: "1"
+
+  - id: sosumi
+    displayName: Sosumi
+    description: Apple documentation search via MCP (HTTP transport)
+    mcp:
+      url: https://sosumi.ai/mcp
+
+  # ── Skills ──────────────────────────────────────────────────────────────
+  - id: skill-xcodebuildmcp
+    displayName: xcodebuildmcp skill
+    description: Loads XcodeBuildMCP tool catalog and workflow guidance
+    type: skill
+    dependencies: [xcodebuildmcp]
+    shell: "npx -y skills add cameroncooke/xcodebuildmcp -g -a claude-code -y"
+
+  # ── Hooks ───────────────────────────────────────────────────────────────
+  - id: hook-ios-simulator
+    displayName: iOS simulator status hook
+    description: Reports booted iOS simulator UUID on session start
+    dependencies: [jq]
+    hookEvent: SessionStart
+    hook:
+      source: hooks/ios-simulator-status.sh
+      destination: ios-simulator-status.sh
+
+  # ── Configuration ───────────────────────────────────────────────────────
+  - id: gitignore
+    displayName: Gitignore
+    description: Ignores XcodeBuildMCP config directory
+    isRequired: true
+    gitignore:
+      - .xcodebuildmcp
+
+# ---------------------------------------------------------------------------
+# Templates — CLAUDE.local.md sections
+# ---------------------------------------------------------------------------
+templates:
+  - sectionIdentifier: ios
+    placeholders:
+      - __PROJECT__
+    contentFile: templates/ios.md
+
+# ---------------------------------------------------------------------------
+# Configure project script — runs during `mcs configure`
+# ---------------------------------------------------------------------------
+configureProject:
+  script: scripts/configure-xcode.sh
+
+# ---------------------------------------------------------------------------
+# Supplementary doctor checks
+# ---------------------------------------------------------------------------
+supplementaryDoctorChecks:
+  - type: commandExists
+    name: Xcode Command Line Tools
+    section: iOS
+    command: xcode-select
+    args: ["-p"]
+    fixCommand: "xcode-select --install"
