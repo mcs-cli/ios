@@ -2,7 +2,6 @@ schemaVersion: 1
 identifier: mcs-ios-pack
 displayName: "iOS Development Pack"
 description: Xcode integration, simulator management, and Apple documentation for Claude Code
-version: "1.0.0"
 author: Bruno Guidolim
 minMCSVersion: "2026.2.28"
 
