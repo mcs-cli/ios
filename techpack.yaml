@@ -1,5 +1,5 @@
 schemaVersion: 1
-identifier: mcs-ios-pack
+identifier: ios
 displayName: "iOS Development Pack"
 description: Xcode integration, simulator management, and Apple documentation for Claude Code
 author: Bruno Guidolim
