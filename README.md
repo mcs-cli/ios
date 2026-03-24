@@ -5,7 +5,7 @@ A [tech pack](https://github.com/mcs-cli/mcs) that integrates Xcode build/test w
 Built for the [`mcs`](https://github.com/mcs-cli/mcs) configuration engine.
 
 ```
-identifier: mcs-ios-pack
+identifier: ios
 requires:   mcs >= 2026.2.28
 ```
 
@@ -90,7 +90,7 @@ During `mcs sync`, you'll be prompted for:
 ## Directory Structure
 
 ```
-mcs-ios-pack/
+ios/
 ├── techpack.yaml                  # Manifest — defines all components
 ├── hooks/
 │   └── ios-simulator-status.sh    # Booted simulator detection
@@ -106,8 +106,8 @@ mcs-ios-pack/
 
 | Pack | Description |
 |------|-------------|
-| [mcs-core-pack](https://github.com/mcs-cli/mcs-core-pack) | Foundational settings, plugins, git workflows, and Serena code navigation |
-| [mcs-continuous-learning](https://github.com/mcs-cli/mcs-continuous-learning) | Persistent memory and knowledge management across sessions |
+| [dev](https://github.com/mcs-cli/dev) | Foundational settings, plugins, git workflows, and Serena code navigation |
+| [memory](https://github.com/mcs-cli/memory) | Persistent memory and knowledge management across sessions |
 
 ---
 
