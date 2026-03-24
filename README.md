@@ -106,7 +106,7 @@ ios/
 
 | Pack | Description |
 |------|-------------|
-| [dev](https://github.com/mcs-cli/dev) | Foundational settings, plugins, git workflows, and Serena code navigation |
+| [dev](https://github.com/mcs-cli/dev) | Foundational settings, plugins, git workflows, and code navigation |
 | [memory](https://github.com/mcs-cli/memory) | Persistent memory and knowledge management across sessions |
 
 ---
