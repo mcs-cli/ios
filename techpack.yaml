@@ -1,6 +1,6 @@
 schemaVersion: 1
 identifier: ios
-displayName: "iOS Development Pack"
+displayName: "iOS Development"
 description: Xcode integration, simulator management, and Apple documentation for Claude Code
 author: Bruno Guidolim
 minMCSVersion: "2026.3.6"

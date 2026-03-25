@@ -1,4 +1,4 @@
-# iOS Development Pack
+# iOS Development
 
 A [tech pack](https://github.com/mcs-cli/mcs) that integrates Xcode build/test workflows, simulator management, and Apple documentation into Claude Code.
 
@@ -6,7 +6,7 @@ Built for the [`mcs`](https://github.com/mcs-cli/mcs) configuration engine.
 
 ```
 identifier: ios
-requires:   mcs >= 2026.2.28
+requires:   mcs >= 2026.3.6
 ```
 
 ---
@@ -45,6 +45,7 @@ On session start, the pack detects your booted simulator and reports its UUID. D
 | Section | Instructions |
 |---------|-------------|
 | **ios** | Use booted simulator by UUID, all builds via XcodeBuildMCP, never run `xcrun`/`xcodebuild` directly, prefer `snapshot_ui` over `screenshot` |
+| **xcodebuildmcp** | XcodeBuildMCP project path and platform configuration |
 
 ### Configuration Script
 
@@ -95,7 +96,8 @@ ios/
 ├── hooks/
 │   └── ios-simulator-status.sh    # Booted simulator detection
 ├── templates/
-│   └── ios.md                     # iOS rules for CLAUDE.local.md
+│   ├── ios.md                     # iOS rules for CLAUDE.local.md
+│   └── xcodebuildmcp.md          # XcodeBuildMCP project configuration
 └── scripts/
     └── configure-xcode.sh         # Creates .xcodebuildmcp/config.yaml
 ```
