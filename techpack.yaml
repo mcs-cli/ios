@@ -109,7 +109,7 @@ templates:
       - xcodebuildmcp
 
 # ---------------------------------------------------------------------------
-# Configure project script — runs during `mcs configure`
+# Configure project script — runs during `mcs sync`
 # ---------------------------------------------------------------------------
 configureProject:
   script: scripts/configure-xcode.sh
