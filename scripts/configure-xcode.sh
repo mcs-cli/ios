@@ -31,6 +31,7 @@ enabledWorkflows:
   - logging
   - doctor
   - workflow-discovery
+showTestTiming: true
 sessionDefaults:
   projectPath: ./$project_file
   suppressWarnings: false

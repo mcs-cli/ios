@@ -6,7 +6,7 @@ author: Bruno Guidolim
 minMCSVersion: "2026.3.6"
 
 # ---------------------------------------------------------------------------
-# Prompts — resolved interactively during `mcs configure`
+# Prompts — resolved interactively during `mcs sync`
 # ---------------------------------------------------------------------------
 prompts:
   - key: PROJECT
@@ -17,7 +17,7 @@ prompts:
       - "*.xcworkspace"
 
 # ---------------------------------------------------------------------------
-# Components (short IDs — auto-prefixed by engine with `mcs-ios-pack.`)
+# Components
 # ---------------------------------------------------------------------------
 components:
   # ── Dependencies ────────────────────────────────────────────────────────
@@ -34,7 +34,7 @@ components:
 
   - id: node
     displayName: Node.js
-    description: JavaScript runtime (for npx-based MCP servers)
+    description: JavaScript runtime (for the npx-based skill installer)
     dependencies: [homebrew]
     brew: node
 
@@ -43,17 +43,21 @@ components:
     dependencies: [homebrew]
     brew: jq
 
+  - id: xcodebuildmcp-cli
+    displayName: XcodeBuildMCP binary
+    description: Xcode build/test/simulator CLI; provides the binary the MCP server runs
+    dependencies: [homebrew]
+    brew: getsentry/xcodebuildmcp/xcodebuildmcp
+
   # ── MCP Servers ─────────────────────────────────────────────────────────
   - id: xcodebuildmcp
     displayName: XcodeBuildMCP
     description: MCP server for Xcode build, test, and simulator workflows
-    dependencies: [node]
+    dependencies: [xcodebuildmcp-cli]
     mcp:
       name: XcodeBuildMCP
-      command: npx
+      command: xcodebuildmcp
       args:
-        - "-y"
-        - "xcodebuildmcp@latest"
         - "mcp"
       env:
         XCODEBUILDMCP_SENTRY_DISABLED: "1"
