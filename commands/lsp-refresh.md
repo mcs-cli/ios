@@ -26,10 +26,14 @@ Nothing is launched; the build just needs to succeed. In order of preference:
 2. The default simulator recorded in `CLAUDE.md` or `CLAUDE.local.md`.
 3. The first entry from `mcp__XcodeBuildMCP__list_sims`.
 
-## 4. Build
+## 4. Prep the project
 
-Call `mcp__XcodeBuildMCP__build_sim` with that scheme and simulator, and wait. Do not run in parallel with other builds on the same worktree — they share `.xcodebuildmcp/DerivedData/`.
+Some projects need to regenerate the Xcode workspace before `xcodebuild` will work — Tuist (`tuist generate`), xcodegen, Bazel, Makefile targets. Check the project's own documentation and any available memory/knowledge tools for a pre-build, regenerate, or bootstrap step, and run it. If nothing is documented, skip to the next step.
 
-## 5. Verify
+## 5. Build
 
-Retry the `workspaceSymbol` query that failed. If it still doesn't resolve, `pkill -TERM sourcekit-lsp xcode-build-server` and retry — respawn clears negatively-cached `No such module` responses.
+Call `mcp__XcodeBuildMCP__build_sim` with that scheme, that simulator, and `buildForTesting: true`, and wait. The `buildForTesting` flag pulls test targets and testing-only helpers into the same DerivedData, so the LSP index covers them too — without it, `findReferences` silently misses call sites in tests and sibling test-helper frameworks. Do not run in parallel with other builds on the same worktree — they share `.xcodebuildmcp/DerivedData/`.
+
+## 6. Verify
+
+Run a `workspaceSymbol` query — the one that failed if you came from a `No such module` error, or a smoke test against a symbol you expect to exist. If it doesn't resolve, `pkill -TERM sourcekit-lsp xcode-build-server` and retry — respawn clears negatively-cached `No such module` responses.
