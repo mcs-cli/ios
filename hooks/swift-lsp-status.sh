@@ -24,6 +24,6 @@ has_index=$(find "$build_root" -name '*.SwiftFileList' -print -quit 2>/dev/null)
 jq -n '{
     hookSpecificOutput: {
         hookEventName: "SessionStart",
-        additionalContext: "Swift LSP has no cached build. Tell the user to run `/lsp-refresh` and wait before answering any question about a Swift symbol. Never fall back to Grep, Glob, or file reads — the answer will be wrong."
+        additionalContext: "Swift LSP has no cached build. Tell the user to run `/lsp-refresh` and wait before using `LSP` for **navigation** queries — don'\''t fall back to Grep, the answer will be wrong. For **audit** tasks (rename, blast-radius) the `Grep` tool remains valid; treat any pre-refresh `LSP` result as a lower bound."
     }
 }'
