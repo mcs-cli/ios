@@ -11,5 +11,5 @@ The `LSP` tool reads `sourcekit-lsp` + `xcode-build-server`, pinned to `.xcodebu
 - `workspaceSymbol` needs a specific `query`. An empty query is a bad query, not a no-result.
 - iOS SDK types (`UIKit`, `SwiftUI`, `Foundation`, Objective-C interop) resolve with full type info — no need to web-search.
 - Same-file edits are live. Cross-module changes need `/lsp-refresh` before other modules see them.
-- Sourcekit-lsp only indexes the **last built scheme's dependency graph**. `/lsp-refresh` builds with `buildForTesting: true` so test targets and their helpers are included, but stories and dev-tools outside every built scheme stay invisible — for those, the `Grep` tool is ground truth.
+- Sourcekit-lsp only indexes the **last built scheme's dependency graph**. `/lsp-refresh` builds with `buildForTesting: true`, which only pulls in the test targets **declared in that scheme's test action** — modular workspaces where unit tests live on separate `<Module>Tests` schemes or under standalone test-plan schemes get partial or zero test coverage from a single app-scheme refresh. For any audit that could touch `Tests/`, treat the `Grep` tool as ground truth, not as a cross-check.
 - Xcode.app builds do not warm this index; only XcodeBuildMCP builds populate `.xcodebuildmcp/DerivedData/`.
