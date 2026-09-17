@@ -1,7 +1,7 @@
 schemaVersion: 1
 identifier: ios
 displayName: "iOS Development"
-description: Xcode integration, simulator management, and Apple documentation for Claude Code
+description: Xcode integration, simulator management, Swift symbol navigation, and Apple documentation for Claude Code
 author: Bruno Guidolim
 minMCSVersion: "2026.3.6"
 
@@ -15,6 +15,10 @@ prompts:
     detectPattern:
       - "*.xcodeproj"
       - "*.xcworkspace"
+
+  - key: SCHEME
+    type: input
+    label: "Main scheme (usually matches the workspace or project name; leave blank to auto-detect)"
 
 # ---------------------------------------------------------------------------
 # Components
@@ -49,6 +53,18 @@ components:
     dependencies: [homebrew]
     brew: getsentry/xcodebuildmcp/xcodebuildmcp
 
+  - id: xcode-build-server
+    displayName: xcode-build-server
+    description: Build Server Protocol adapter that bridges sourcekit-lsp with xcodebuild
+    dependencies: [homebrew]
+    brew: xcode-build-server
+    doctorChecks:
+      - type: fileExists
+        name: buildServer.json
+        section: iOS
+        path: buildServer.json
+        scope: project
+
   # ── MCP Servers ─────────────────────────────────────────────────────────
   - id: xcodebuildmcp
     displayName: XcodeBuildMCP
@@ -76,6 +92,22 @@ components:
     dependencies: [xcodebuildmcp]
     shell: "npx -y skills add getsentry/xcodebuildmcp --skill xcodebuildmcp -g -a claude-code -y"
 
+  # ── Plugins ─────────────────────────────────────────────────────────────
+  - id: plugin-swift-lsp
+    displayName: swift-lsp plugin
+    description: Provides the LSP tool backed by sourcekit-lsp for symbolic navigation
+    dependencies: [xcode-build-server]
+    plugin: "swift-lsp@claude-plugins-official"
+
+  # ── Commands ────────────────────────────────────────────────────────────
+  - id: command-lsp-refresh
+    displayName: /lsp-refresh command
+    description: Rebuilds the workspace via XcodeBuildMCP to refresh the Swift LSP index
+    dependencies: [xcodebuildmcp, xcode-build-server, skill-xcodebuildmcp]
+    command:
+      source: commands/lsp-refresh.md
+      destination: lsp-refresh.md
+
   # ── Hooks ───────────────────────────────────────────────────────────────
   - id: hook-ios-simulator
     displayName: iOS simulator status hook
@@ -86,13 +118,23 @@ components:
       source: hooks/ios-simulator-status.sh
       destination: ios-simulator-status.sh
 
+  - id: hook-swift-lsp-status
+    displayName: Swift LSP status hook
+    description: Warns on session start when the Swift LSP has no cached build
+    dependencies: [jq, xcode-build-server, xcodebuildmcp]
+    hookEvent: SessionStart
+    hook:
+      source: hooks/swift-lsp-status.sh
+      destination: swift-lsp-status.sh
+
   # ── Configuration ───────────────────────────────────────────────────────
   - id: gitignore
     displayName: Gitignore
-    description: Ignores XcodeBuildMCP config directory
+    description: Ignores XcodeBuildMCP config directory and generated buildServer.json
     isRequired: true
     gitignore:
       - .xcodebuildmcp
+      - buildServer.json
 
 # ---------------------------------------------------------------------------
 # Templates — CLAUDE.local.md sections
@@ -106,6 +148,13 @@ templates:
       - __PROJECT__
     contentFile: templates/xcodebuildmcp.md
     dependencies:
+      - xcodebuildmcp
+
+  - sectionIdentifier: swift-lsp
+    contentFile: templates/swift-lsp.md
+    dependencies:
+      - xcode-build-server
+      - plugin-swift-lsp
       - xcodebuildmcp
 
 # ---------------------------------------------------------------------------
