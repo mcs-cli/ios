@@ -2,7 +2,7 @@
 
 # iOS Development
 
-### Build, test, and run your app without leaving the conversation.
+### Build, test, run, and navigate your app without leaving the conversation.
 
 [![MCS tech pack](https://img.shields.io/badge/MCS-tech%20pack-6f42c1)](https://github.com/mcs-cli/mcs)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-compatible-d97757)](https://docs.anthropic.com/en/docs/claude-code)
