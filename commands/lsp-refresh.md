@@ -32,7 +32,7 @@ Some projects need to regenerate the Xcode workspace before `xcodebuild` will wo
 
 ## 5. Build
 
-Call `mcp__XcodeBuildMCP__build_sim` with that scheme, that simulator, and `buildForTesting: true`, and wait. The `buildForTesting` flag pulls test targets and testing-only helpers into the same DerivedData, so the LSP index covers them too — without it, `findReferences` silently misses call sites in tests and sibling test-helper frameworks. Do not run in parallel with other builds on the same worktree — they share `.xcodebuildmcp/DerivedData/`.
+Call `mcp__XcodeBuildMCP__build_sim` with that scheme, that simulator, and `buildForTesting: true`, and wait. The `buildForTesting` flag pulls in the test targets declared in the current scheme's test action — enough for projects whose app scheme runs its own tests, partial or nothing for modular workspaces that keep unit tests on separate `<Module>Tests` schemes. Do not run in parallel with other builds on the same worktree — they share `.xcodebuildmcp/DerivedData/`.
 
 ## 6. Verify
 
