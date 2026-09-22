@@ -23,7 +23,9 @@ IFS=$'\x1f' read -r tool file_path offset limit pattern glob grep_path < <(
 
 case "$tool" in
     Read)
-        [[ "$file_path" == *.swift && -z "$offset" && -z "$limit" ]] || exit 0
+        # `limit` alone is a peek (nav shape); a targeted post-LSP slice
+        # carries `offset`. Only `offset`-bearing reads escape the block.
+        [[ "$file_path" == *.swift && -z "$offset" ]] || exit 0
         ;;
     Grep)
         # Any regex metachar in $pattern breaks the identifier regex, so
@@ -49,6 +51,6 @@ All ops require `filePath` (any real `.swift` file — the tool rejects `.` or a
 
 For audit sweeps (rename, deprecation, Tests/) shape the call to pass:
   Grep — word-boundary regex (\bName\b) or a scope glob/path.
-  Read — pass explicit offset/limit for a targeted slice.
+  Read — pass an explicit `offset` for a targeted slice (a `limit` alone is a peek and still blocks).
 EOF
 exit 2
