@@ -46,7 +46,7 @@ Install per project rather than globally. The pack asks which Xcode project or w
 
 Syncing asks one question: which Xcode project or workspace to use. `mcs` detects every `*.xcodeproj` and `*.xcworkspace` in the repository and offers them. The answer becomes `sessionDefaults.projectPath` in the generated config and fills the project placeholder in the build rules written to `CLAUDE.local.md`.
 
-The generated `.xcodebuildmcp/config.yaml` pins the default platform to `iOS`, leaves `suppressWarnings` off, turns on test timing output, and enables these workflows:
+The generated `.xcodebuildmcp/config.yaml` pins the default platform to `iOS`, points DerivedData at `./.xcodebuildmcp/DerivedData/` so build artifacts stay in the repo (gitignored, easy to prune, survives worktree moves), leaves `suppressWarnings` off, turns on test timing output, and enables these workflows:
 
 ```text
 simulator · ui-automation · project-discovery · utilities

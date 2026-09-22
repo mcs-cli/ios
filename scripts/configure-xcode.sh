@@ -34,6 +34,7 @@ enabledWorkflows:
 showTestTiming: true
 sessionDefaults:
   projectPath: ./$project_file
+  derivedDataPath: ./.xcodebuildmcp/DerivedData
   suppressWarnings: false
   platform: iOS
 EOF
