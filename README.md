@@ -39,7 +39,7 @@ Install per project rather than globally. The pack asks which Xcode project or w
 **There are no tool names to memorize.** Once installed, the rules and the tool catalog arrive on their own, and the pack keeps Claude pointed at the project and device you actually meant.
 
 1. **Sync** — the pack detects your `.xcodeproj` or `.xcworkspace`, writes `.xcodebuildmcp/config.yaml` pinning DerivedData to `.xcodebuildmcp/DerivedData/`, then auto-detects the primary scheme and runs `xcode-build-server config` to generate `buildServer.json` at the project root. Both are gitignored for you.
-2. **Session start** — one hook asks `simctl` for a booted simulator and reports its UUID; a second hook warns when the Swift LSP has no cached build yet. Either can be uninstalled independently.
+2. **Session start** — one hook asks `simctl` for a booted simulator and reports its UUID; a second hook warns when the Swift LSP has no cached build yet. A third hook runs before every tool call: whole-file `Read` on `.swift` and bare-identifier `Grep` with no scope get blocked so navigation goes through `LSP`; audit-shaped calls (glob, path, word-boundary regex, or an `offset`/`limit` slice) pass through untouched. Any of the three can be uninstalled independently.
 3. **Before the first build** — `CLAUDE.local.md` tells Claude to invoke the `xcodebuildmcp` skill for the tool catalog and workflow guidance, then to confirm the active project and simulator with `session_show_defaults`.
 4. **During work** — builds, tests, runs, simulator control, log capture, and UI automation all go through XcodeBuildMCP. `sourcekit-lsp` resolves symbols, definitions, and workspace-wide references from the shared `.xcodebuildmcp/DerivedData/` index. Raw `xcrun` and `xcodebuild` calls are off-limits, warnings get fixed rather than suppressed, and nothing is built or tested unless you ask for it.
 5. **When symbols drift** — `/lsp-refresh` rebuilds through XcodeBuildMCP so the LSP index picks up new imports, files, and cross-module changes.
@@ -69,6 +69,7 @@ To target a different project, or after renaming one, run `mcs sync` again. The 
 | **xcodebuildmcp** (skill) | Loads the XcodeBuildMCP tool catalog and workflow guidance before the first build |
 | **ios-simulator-status.sh** (hook) | Reports the booted simulator at session start |
 | **swift-lsp-status.sh** (hook) | Warns at session start when the Swift LSP has no cached build |
+| **swift-lsp-nav-enforce.sh** (hook) | Blocks nav-shaped `Read`/`Grep` on Swift so navigation goes through `LSP`; audit-shaped calls pass through |
 | **configure-xcode.sh** (script) | Writes `.xcodebuildmcp/config.yaml` and `buildServer.json` from the detected project and scheme at sync time |
 | **/lsp-refresh** (command) | Rebuilds through XcodeBuildMCP so the Swift LSP index picks up new imports and cross-module changes |
 | **ios.md** (template) | Simulator rules: booted device first and by UUID, ask when none is booted, run the formatter and linter after editing Swift |
@@ -85,7 +86,8 @@ ios/
 ├── techpack.yaml                   # Manifest — defines all components
 ├── hooks/
 │   ├── ios-simulator-status.sh     # Booted simulator detection
-│   └── swift-lsp-status.sh         # LSP freshness check
+│   ├── swift-lsp-status.sh         # LSP freshness check
+│   └── swift-lsp-nav-enforce.sh    # Blocks nav-shaped Read/Grep on Swift
 ├── commands/
 │   └── lsp-refresh.md              # /lsp-refresh — rebuilds to hydrate the LSP index
 ├── templates/

@@ -127,6 +127,16 @@ components:
       source: hooks/swift-lsp-status.sh
       destination: swift-lsp-status.sh
 
+  - id: hook-swift-lsp-nav-enforce
+    displayName: Swift LSP navigation enforcement hook
+    description: Blocks Read/Grep on Swift when the call shape is symbol navigation; audit shapes pass through
+    dependencies: [jq, xcode-build-server, plugin-swift-lsp]
+    hookEvent: PreToolUse
+    hookMatcher: "Read|Grep"
+    hook:
+      source: hooks/swift-lsp-nav-enforce.sh
+      destination: swift-lsp-nav-enforce.sh
+
   # ── Configuration ───────────────────────────────────────────────────────
   - id: gitignore
     displayName: Gitignore
