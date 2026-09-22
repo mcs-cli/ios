@@ -45,7 +45,7 @@ LSP operations (call `ToolSearch(query="select:LSP")` first if not loaded):
   documentSymbol    — file outline
   findReferences    — reference list at a position
 
-All ops require `filePath` + 1-based `line` + `character`.
+All ops require `filePath` (any real `.swift` file — the tool rejects `.` or a directory with `Path is not a file`), plus 1-based `line` and `character`.
 
 For audit sweeps (rename, deprecation, Tests/) shape the call to pass:
   Grep — word-boundary regex (\bName\b) or a scope glob/path.
