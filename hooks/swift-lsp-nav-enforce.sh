@@ -38,10 +38,14 @@ esac
 cat >&2 <<'EOF'
 Swift navigation → use LSP, not Read/Grep.
 
-Symbol lookup     → LSP.workspaceSymbol(query="Name")
-Definition/hover  → LSP.hover / LSP.goToDefinition
-File outline      → LSP.documentSymbol(uri=…)
-References        → LSP.findReferences
+LSP operations (call `ToolSearch(query="select:LSP")` first if not loaded):
+  workspaceSymbol   — symbol lookup by name (needs a non-empty `query`)
+  hover             — signature/doc at a position
+  goToDefinition    — jump to definition at a position
+  documentSymbol    — file outline
+  findReferences    — reference list at a position
+
+All ops require `filePath` + 1-based `line` + `character`.
 
 For audit sweeps (rename, deprecation, Tests/) shape the call to pass:
   Grep — word-boundary regex (\bName\b) or a scope glob/path.
