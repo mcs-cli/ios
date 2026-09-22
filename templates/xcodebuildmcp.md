@@ -9,3 +9,4 @@ All build, test, and run operations go through **XcodeBuildMCP**. When a task re
 - Always use `__PROJECT__` with the appropriate scheme
 - **Never** suppress warnings — if any are related to the session, fix them
 - Prefer `snapshot_ui` over `screenshot` (screenshot only as fallback)
+- Bash `find` ignores `.gitignore` — prune `.xcodebuildmcp/` explicitly (`find . -path './.xcodebuildmcp' -prune -o …`) so it doesn't walk DerivedData. The `Grep` tool (ripgrep) honors gitignore and needs no guard.
