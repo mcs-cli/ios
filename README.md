@@ -11,7 +11,7 @@
 
 </div>
 
-Claude Code can already write Swift. What it cannot do out of the box is build that Swift, run it on a simulator, read the failure, and look up the API it got wrong. This pack closes the loop: every build, test, and simulator action routes through XcodeBuildMCP, Apple's documentation is one search away, and the booted simulator is announced at session start so Claude targets a device by UUID instead of guessing at names.
+Claude Code can already write Swift. What it cannot do out of the box is build that Swift, run it on a simulator, read the failure, and look up the API it got wrong. This pack closes the loop: every build, test, and simulator action routes through MobileBuildMCP, Apple's documentation is one search away, and the booted simulator is announced at session start so Claude targets a device by UUID instead of guessing at names.
 
 ```text
 identifier: ios
@@ -28,45 +28,55 @@ mcs sync
 mcs doctor                        # 4. verify everything is healthy
 ```
 
-**Prerequisites:** macOS, [Claude Code](https://docs.anthropic.com/en/docs/claude-code), and Xcode with its command line tools (`xcode-select --install`). `mcs` installs the remaining dependencies through Homebrew: the [XcodeBuildMCP](https://github.com/getsentry/xcodebuildmcp) binary, `jq` for the simulator hook, and Node.js for the skill installer.
+**Prerequisites:** macOS, [Claude Code](https://docs.anthropic.com/en/docs/claude-code), and Xcode with its command line tools (`xcode-select --install`). `mcs` installs the remaining dependencies through Homebrew: the [MobileBuildMCP](https://github.com/getsentry/MobileBuildMCP) binary and `jq` for the simulator hook.
 
-Install per project rather than globally. The pack asks which Xcode project or workspace to target and writes a `.xcodebuildmcp/config.yaml` beside it, so it needs to run from inside the repository.
+Install per project rather than globally. The pack asks which Xcode project or workspace to target and writes a `.mobilebuildmcp/config.yaml` beside it, so it needs to run from inside the repository.
 
 ## How it works
 
 **There are no tool names to memorize.** Once installed, the rules and the tool catalog arrive on their own, and the pack keeps Claude pointed at the project and device you actually meant.
 
-1. **Sync** — the pack detects your `.xcodeproj` or `.xcworkspace` and writes `.xcodebuildmcp/config.yaml` with the project path, `iOS` as the default platform, and the workflow set enabled. The file is gitignored for you.
+1. **Sync** — the pack detects your `.xcodeproj` or `.xcworkspace` and writes `.mobilebuildmcp/config.yaml` with the project path, `iOS` as the default platform, and the workflow set enabled. The file is gitignored for you.
 2. **Session start** — a hook asks `simctl` for a booted simulator and reports its name and UUID as session context. Nothing is printed when no simulator is running.
-3. **Before the first build** — `CLAUDE.local.md` tells Claude to invoke the `xcodebuildmcp` skill, loading the tool catalog and workflow guidance rather than guessing at tool names, then to confirm the active project, scheme, and simulator with `session_show_defaults`.
-4. **During work** — builds, tests, runs, simulator control, log capture, and UI automation all go through XcodeBuildMCP. Raw `xcrun` and `xcodebuild` calls are off-limits, warnings get fixed rather than suppressed, and nothing is built or tested unless you ask for it.
+3. **Before the first build** — the MobileBuildMCP server hands Claude its tool catalog and workflow guidance when the session connects, including the instruction to confirm the active project, scheme, and simulator with `session_show_defaults`.
+4. **During work** — builds, tests, runs, simulator control, log capture, and UI automation all go through MobileBuildMCP. Raw `xcrun`, `xcodebuild`, and `simctl` calls are off-limits, warnings get fixed rather than suppressed, and nothing is built or tested unless you ask for it.
 5. **When an API is unfamiliar** — Sosumi searches Apple's developer documentation over MCP, with no local index to build and nothing extra to install.
 
 ## Configuration
 
-Syncing asks one question: which Xcode project or workspace to use. `mcs` detects every `*.xcodeproj` and `*.xcworkspace` in the repository and offers them. The answer becomes `sessionDefaults.projectPath` in the generated config and fills the project placeholder in the build rules written to `CLAUDE.local.md`.
+Syncing asks one question: which Xcode project or workspace to use. `mcs` detects every `*.xcworkspace` and `*.xcodeproj` at the repository root and offers them, workspaces first. A workspace becomes `sessionDefaults.workspacePath` in the generated config, a project becomes `sessionDefaults.projectPath`. When nothing is detected — a Tuist or XcodeGen project that hasn't been generated yet, or one in a subfolder — type the path (e.g. `Generated.xcworkspace` or `App/App.xcodeproj`); it doesn't have to exist yet.
 
-The generated `.xcodebuildmcp/config.yaml` pins the default platform to `iOS`, points DerivedData at `./.xcodebuildmcp/DerivedData/` so build artifacts stay in the repo (gitignored, easy to prune, survives worktree moves), leaves `suppressWarnings` off, turns on test timing output, and enables these workflows:
+The generated `.mobilebuildmcp/config.yaml` pins the default platform to `iOS`, points DerivedData at `./.mobilebuildmcp/DerivedData/` so build artifacts stay in the repo (gitignored, survives worktree moves, kept as the incremental build cache), leaves `suppressWarnings` off, turns on test timing output, opts out of Sentry telemetry, and enables these workflows:
 
 ```text
-simulator · ui-automation · project-discovery · utilities
-session-management · debugging · logging · doctor · workflow-discovery
+simulator · simulator-management · ui-automation · project-discovery
+utilities · session-management · debugging
 ```
 
 To target a different project, or after renaming one, run `mcs sync` again. The config is regenerated at sync time rather than read from a runtime setting.
+
+### Upgrading from XcodeBuildMCP
+
+XcodeBuildMCP was renamed to MobileBuildMCP in v2.7.1. The next `mcs sync` swaps the MCP server, installs the `mobilebuildmcp` formula, and deletes the old `.xcodebuildmcp/` directory (DerivedData rebuilds once). Two leftovers are yours to remove:
+
+```bash
+brew uninstall xcodebuildmcp
+rm -rf ~/.claude/skills/xcodebuildmcp   # the pack no longer installs a skill
+```
+
+Permission rules that allow `mcp__XcodeBuildMCP__*` need to be updated to `mcp__MobileBuildMCP__*`.
 
 ## What's included
 
 | Component | What it does |
 |---|---|
-| **XcodeBuildMCP** (MCP) | Builds, tests, runs, controls simulators, captures logs, and drives UI automation through the Homebrew `xcodebuildmcp` binary |
+| **MobileBuildMCP** (MCP) | Builds, tests, runs, controls simulators, captures logs, and drives UI automation through the Homebrew `mobilebuildmcp` binary |
 | **Sosumi** (MCP) | Searches Apple developer documentation over HTTP |
-| **xcodebuildmcp** (skill) | Loads the XcodeBuildMCP tool catalog and workflow guidance before the first build |
 | **ios-simulator-status.sh** (hook) | Reports the booted simulator's name and UUID at session start |
-| **configure-xcode.sh** (script) | Writes `.xcodebuildmcp/config.yaml` from the detected project at sync time |
+| **configure-xcode.sh** (script) | Writes `.mobilebuildmcp/config.yaml` from the detected project at sync time |
 | **ios.md** (template) | Simulator rules: booted device first and by UUID, ask when none is booted, run the formatter and linter after editing Swift |
-| **xcodebuildmcp.md** (template) | Build rules: skill first, verify session defaults, never call `xcrun` or `xcodebuild` directly, never suppress warnings, prefer `snapshot_ui` over `screenshot` |
-| `.xcodebuildmcp` (gitignore) | Keeps the generated config out of version control |
+| **mobilebuildmcp.md** (template) | Build rules the server doesn't already give: never call `xcrun`, `xcodebuild`, or `simctl` directly, build only when asked, fix session-related warnings instead of suppressing them, never delete DerivedData |
+| `.mobilebuildmcp` (gitignore) | Keeps the generated config out of version control |
 
 `mcs doctor` additionally checks that the Xcode command line tools are installed, and offers `xcode-select --install` as the fix.
 
@@ -79,9 +89,9 @@ ios/
 │   └── ios-simulator-status.sh     # Booted simulator detection
 ├── templates/
 │   ├── ios.md                      # Simulator and code quality rules
-│   └── xcodebuildmcp.md            # Build/test rules for the detected project
+│   └── mobilebuildmcp.md           # Build/test policy on top of the server instructions
 └── scripts/
-    └── configure-xcode.sh          # Writes .xcodebuildmcp/config.yaml
+    └── configure-xcode.sh          # Writes .mobilebuildmcp/config.yaml
 ```
 
 ## You might also like

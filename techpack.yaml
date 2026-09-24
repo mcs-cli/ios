@@ -13,8 +13,8 @@ prompts:
     type: fileDetect
     label: "Xcode project / workspace"
     detectPattern:
-      - "*.xcodeproj"
       - "*.xcworkspace"
+      - "*.xcodeproj"
 
 # ---------------------------------------------------------------------------
 # Components
@@ -32,49 +32,35 @@ components:
         section: Dependencies
         command: brew
 
-  - id: node
-    displayName: Node.js
-    description: JavaScript runtime (for the npx-based skill installer)
-    dependencies: [homebrew]
-    brew: node
-
   - id: jq
     description: JSON processor (used by simulator hook)
     dependencies: [homebrew]
     brew: jq
 
-  - id: xcodebuildmcp-cli
-    displayName: XcodeBuildMCP binary
-    description: Xcode build/test/simulator CLI; provides the binary the MCP server runs
+  - id: mobilebuildmcp-binary
+    displayName: MobileBuildMCP binary
+    description: Provides the binary the MobileBuildMCP server runs
     dependencies: [homebrew]
-    brew: getsentry/xcodebuildmcp/xcodebuildmcp
+    brew: getsentry/xcodebuildmcp/mobilebuildmcp
 
   # ── MCP Servers ─────────────────────────────────────────────────────────
-  - id: xcodebuildmcp
-    displayName: XcodeBuildMCP
+  - id: mobilebuildmcp
+    displayName: MobileBuildMCP
     description: MCP server for Xcode build, test, and simulator workflows
-    dependencies: [xcodebuildmcp-cli]
+    dependencies: [mobilebuildmcp-binary]
     mcp:
-      name: XcodeBuildMCP
-      command: xcodebuildmcp
+      name: MobileBuildMCP
+      command: mobilebuildmcp
       args:
         - "mcp"
       env:
-        XCODEBUILDMCP_SENTRY_DISABLED: "1"
+        MOBILEBUILDMCP_SENTRY_DISABLED: "true"
 
   - id: sosumi
     displayName: Sosumi
     description: Apple documentation search via MCP (HTTP transport)
     mcp:
       url: https://sosumi.ai/mcp
-
-  # ── Skills ──────────────────────────────────────────────────────────────
-  - id: skill-xcodebuildmcp
-    displayName: xcodebuildmcp skill
-    description: Loads XcodeBuildMCP tool catalog and workflow guidance
-    type: skill
-    dependencies: [xcodebuildmcp]
-    shell: "npx -y skills add getsentry/xcodebuildmcp --skill xcodebuildmcp -g -a claude-code -y"
 
   # ── Hooks ───────────────────────────────────────────────────────────────
   - id: hook-ios-simulator
@@ -89,10 +75,10 @@ components:
   # ── Configuration ───────────────────────────────────────────────────────
   - id: gitignore
     displayName: Gitignore
-    description: Ignores XcodeBuildMCP config directory
+    description: Ignores MobileBuildMCP config directory
     isRequired: true
     gitignore:
-      - .xcodebuildmcp
+      - .mobilebuildmcp
 
 # ---------------------------------------------------------------------------
 # Templates — CLAUDE.local.md sections
@@ -101,12 +87,10 @@ templates:
   - sectionIdentifier: ios
     contentFile: templates/ios.md
 
-  - sectionIdentifier: xcodebuildmcp
-    placeholders:
-      - __PROJECT__
-    contentFile: templates/xcodebuildmcp.md
+  - sectionIdentifier: mobilebuildmcp
+    contentFile: templates/mobilebuildmcp.md
     dependencies:
-      - xcodebuildmcp
+      - mobilebuildmcp
 
 # ---------------------------------------------------------------------------
 # Configure project script — runs during `mcs sync`
