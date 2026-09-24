@@ -8,11 +8,23 @@ set -euo pipefail
 
 project_path="${MCS_PROJECT_PATH:?MCS_PROJECT_PATH not set}"
 project_file="${MCS_RESOLVED_PROJECT:-}"
+project_file="${project_file#./}"
 
 if [ -z "$project_file" ]; then
     echo "No Xcode project selected — skipping .mobilebuildmcp configuration"
     exit 0
 fi
+
+# MobileBuildMCP maps these to xcodebuild -workspace / -project and rejects both at once.
+# The file isn't required to exist yet, so generated projects can be configured before generation.
+case "$project_file" in
+    *.xcworkspace) path_key="workspacePath" ;;
+    *.xcodeproj)   path_key="projectPath" ;;
+    *)
+        echo "Unsupported project '$project_file' — expected .xcworkspace or .xcodeproj; skipping .mobilebuildmcp configuration" >&2
+        exit 0
+        ;;
+esac
 
 # MobileBuildMCP (formerly XcodeBuildMCP) no longer reads the old directory
 legacy_dir="$project_path/.xcodebuildmcp"
@@ -39,7 +51,7 @@ enabledWorkflows:
 showTestTiming: true
 sentryDisabled: true
 sessionDefaults:
-  projectPath: ./$project_file
+  $path_key: ./$project_file
   derivedDataPath: ./.mobilebuildmcp/DerivedData
   suppressWarnings: false
   platform: iOS

@@ -13,8 +13,8 @@ prompts:
     type: fileDetect
     label: "Xcode project / workspace"
     detectPattern:
-      - "*.xcodeproj"
       - "*.xcworkspace"
+      - "*.xcodeproj"
 
 # ---------------------------------------------------------------------------
 # Components
@@ -88,8 +88,6 @@ templates:
     contentFile: templates/ios.md
 
   - sectionIdentifier: mobilebuildmcp
-    placeholders:
-      - __PROJECT__
     contentFile: templates/mobilebuildmcp.md
     dependencies:
       - mobilebuildmcp

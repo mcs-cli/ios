@@ -39,12 +39,12 @@ Install per project rather than globally. The pack asks which Xcode project or w
 1. **Sync** — the pack detects your `.xcodeproj` or `.xcworkspace` and writes `.mobilebuildmcp/config.yaml` with the project path, `iOS` as the default platform, and the workflow set enabled. The file is gitignored for you.
 2. **Session start** — a hook asks `simctl` for a booted simulator and reports its name and UUID as session context. Nothing is printed when no simulator is running.
 3. **Before the first build** — the MobileBuildMCP server hands Claude its tool catalog and workflow guidance when the session connects, including the instruction to confirm the active project, scheme, and simulator with `session_show_defaults`.
-4. **During work** — builds, tests, runs, simulator control, log capture, and UI automation all go through MobileBuildMCP. Raw `xcrun` and `xcodebuild` calls are off-limits, warnings get fixed rather than suppressed, and nothing is built or tested unless you ask for it.
+4. **During work** — builds, tests, runs, simulator control, log capture, and UI automation all go through MobileBuildMCP. Raw `xcrun`, `xcodebuild`, and `simctl` calls are off-limits, warnings get fixed rather than suppressed, and nothing is built or tested unless you ask for it.
 5. **When an API is unfamiliar** — Sosumi searches Apple's developer documentation over MCP, with no local index to build and nothing extra to install.
 
 ## Configuration
 
-Syncing asks one question: which Xcode project or workspace to use. `mcs` detects every `*.xcodeproj` and `*.xcworkspace` in the repository and offers them. The answer becomes `sessionDefaults.projectPath` in the generated config and fills the project placeholder in the build rules written to `CLAUDE.local.md`.
+Syncing asks one question: which Xcode project or workspace to use. `mcs` detects every `*.xcworkspace` and `*.xcodeproj` at the repository root and offers them, workspaces first. A workspace becomes `sessionDefaults.workspacePath` in the generated config, a project becomes `sessionDefaults.projectPath`. When nothing is detected — a Tuist or XcodeGen project that hasn't been generated yet, or one in a subfolder — type the path (e.g. `Generated.xcworkspace` or `App/App.xcodeproj`); it doesn't have to exist yet.
 
 The generated `.mobilebuildmcp/config.yaml` pins the default platform to `iOS`, points DerivedData at `./.mobilebuildmcp/DerivedData/` so build artifacts stay in the repo (gitignored, survives worktree moves, kept as the incremental build cache), leaves `suppressWarnings` off, turns on test timing output, opts out of Sentry telemetry, and enables these workflows:
 
@@ -75,7 +75,7 @@ Permission rules that allow `mcp__XcodeBuildMCP__*` need to be updated to `mcp__
 | **ios-simulator-status.sh** (hook) | Reports the booted simulator's name and UUID at session start |
 | **configure-xcode.sh** (script) | Writes `.mobilebuildmcp/config.yaml` from the detected project at sync time |
 | **ios.md** (template) | Simulator rules: booted device first and by UUID, ask when none is booted, run the formatter and linter after editing Swift |
-| **mobilebuildmcp.md** (template) | Build rules: never call `xcrun` or `xcodebuild` directly, never suppress warnings, never delete DerivedData, prefer `snapshot_ui` and element refs over screenshots and coordinates |
+| **mobilebuildmcp.md** (template) | Build rules the server doesn't already give: never call `xcrun`, `xcodebuild`, or `simctl` directly, build only when asked, fix warnings, never delete DerivedData |
 | `.mobilebuildmcp` (gitignore) | Keeps the generated config out of version control |
 
 `mcs doctor` additionally checks that the Xcode command line tools are installed, and offers `xcode-select --install` as the fix.
