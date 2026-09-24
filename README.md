@@ -75,7 +75,7 @@ Permission rules that allow `mcp__XcodeBuildMCP__*` need to be updated to `mcp__
 | **ios-simulator-status.sh** (hook) | Reports the booted simulator's name and UUID at session start |
 | **configure-xcode.sh** (script) | Writes `.mobilebuildmcp/config.yaml` from the detected project at sync time |
 | **ios.md** (template) | Simulator rules: booted device first and by UUID, ask when none is booted, run the formatter and linter after editing Swift |
-| **mobilebuildmcp.md** (template) | Build rules the server doesn't already give: never call `xcrun`, `xcodebuild`, or `simctl` directly, build only when asked, fix warnings, never delete DerivedData |
+| **mobilebuildmcp.md** (template) | Build rules the server doesn't already give: never call `xcrun`, `xcodebuild`, or `simctl` directly, build only when asked, fix session-related warnings instead of suppressing them, never delete DerivedData |
 | `.mobilebuildmcp` (gitignore) | Keeps the generated config out of version control |
 
 `mcs doctor` additionally checks that the Xcode command line tools are installed, and offers `xcode-select --install` as the fix.
@@ -89,7 +89,7 @@ ios/
 │   └── ios-simulator-status.sh     # Booted simulator detection
 ├── templates/
 │   ├── ios.md                      # Simulator and code quality rules
-│   └── mobilebuildmcp.md           # Build/test rules for the detected project
+│   └── mobilebuildmcp.md           # Build/test policy on top of the server instructions
 └── scripts/
     └── configure-xcode.sh          # Writes .mobilebuildmcp/config.yaml
 ```
