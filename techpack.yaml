@@ -21,17 +21,6 @@ prompts:
 # ---------------------------------------------------------------------------
 components:
   # ── Dependencies ────────────────────────────────────────────────────────
-  - id: homebrew
-    displayName: Homebrew
-    description: macOS package manager
-    type: brewPackage
-    shell: '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
-    doctorChecks:
-      - type: commandExists
-        name: Homebrew
-        section: Dependencies
-        command: brew
-
   - id: jq
     description: JSON processor (used by simulator hook)
     brew: jq
