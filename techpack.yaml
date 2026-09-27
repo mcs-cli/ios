@@ -34,20 +34,17 @@ components:
 
   - id: jq
     description: JSON processor (used by simulator hook)
-    dependencies: [homebrew]
     brew: jq
 
   - id: mobilebuildmcp-binary
     displayName: MobileBuildMCP binary
     description: Provides the binary the MobileBuildMCP server runs
-    dependencies: [homebrew]
     brew: getsentry/xcodebuildmcp/mobilebuildmcp
 
   # ── MCP Servers ─────────────────────────────────────────────────────────
   - id: mobilebuildmcp
     displayName: MobileBuildMCP
     description: MCP server for Xcode build, test, and simulator workflows
-    dependencies: [mobilebuildmcp-binary]
     mcp:
       name: MobileBuildMCP
       command: mobilebuildmcp
@@ -66,7 +63,6 @@ components:
   - id: hook-ios-simulator
     displayName: iOS simulator status hook
     description: Reports booted iOS simulator UUID on session start
-    dependencies: [jq]
     hookEvent: SessionStart
     hook:
       source: hooks/ios-simulator-status.sh
@@ -76,7 +72,6 @@ components:
   - id: gitignore
     displayName: Gitignore
     description: Ignores MobileBuildMCP config directory
-    isRequired: true
     gitignore:
       - .mobilebuildmcp
 
@@ -89,8 +84,6 @@ templates:
 
   - sectionIdentifier: mobilebuildmcp
     contentFile: templates/mobilebuildmcp.md
-    dependencies:
-      - mobilebuildmcp
 
 # ---------------------------------------------------------------------------
 # Configure project script — runs during `mcs sync`
